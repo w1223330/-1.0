@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image (Image, 'D:/Halcon-WorkSpaces/Halcon-Demo/测量/卡尺测量/2D测量/Image/test2.png')</l>
+<l>rgb1_to_gray (Image, GrayImage)</l>
+<c>*创建几何测量句柄</c>
+<l>create_metrology_model (MetrologyHandle)</l>
+<c>*设置句柄与图像的像素关系</c>
+<l>get_image_size (Image, Width, Height)</l>
+<l>set_metrology_model_image_size (MetrologyHandle, Width, Height)</l>
+<c>*自定义椭圆模型</c>
+<l>draw_ellipse (3600, Row, Column, Phi, Radius1, Radius2)</l>
+<c>*添加椭圆模型</c>
+<c>*卡边尺长</c>
+<l>MeasureLength1:=30</l>
+<c>*卡边尺宽</c>
+<l>MeasureLength2:=5</l>
+<l>add_metrology_object_ellipse_measure (MetrologyHandle, Row, Column, Phi, Radius1, Radius2, 30, 5, 1, 30, [], [], Index)</l>
+<c>*显示卡边尺模型</c>
+<l>get_metrology_object_measures (Contours, MetrologyHandle, 'all', 'all', Row, Column)</l>
+<c>*开始测量</c>
+<l>apply_metrology_model (GrayImage, MetrologyHandle)</l>
+<c>*显示提取到的轮廓线</c>
+<l>get_metrology_object_result_contour (Contour, MetrologyHandle, 'all', 'all', 1.5)</l>
+<c>*拟合，计算轮廓结果</c>
+<l>fit_ellipse_contour_xld (Contour, 'fitzgibbon', -1, 0, 0, 200, 3, 2, Row1, Column1, Phi1, Radius1, Radius2, StartPhi, EndPhi, PointOrder)</l>
+<c>*显示结果</c>
+<c>*椭圆的中心点</c>
+<l>gen_cross_contour_xld (Cross, Row1, Column1, Radius1*2, Phi1)</l>
+<l>set_display_font (3600, 30, 'mono', 'true', 'false')</l>
+<l>disp_message (3600, ['椭圆中心坐标：('+Row1+','+Column1+')','椭圆斜率：'+Phi1,'椭圆最大半长：'+Radius1,'椭圆最小半长：'+Radius2], 'window', 12, 112, 'green', 'false')</l>
+<c>*清除句柄</c>
+<l>clear_metrology_model (MetrologyHandle)</l>
+<c> </c>
+<c> </c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

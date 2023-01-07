@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image (Image, 'E:/HALCON/形态学/lQLPJxbj8bDSBT3NAYHNAhCwN_ysG5D7_xIDdoeptsCbAA_528_385.png')</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>dev_close_window ()</l>
+<l>*dev_open_window (0, 0, Width, Height, 'black', WindowHandle)</l>
+<l>dev_open_window_fit_size (0, 0, Width+100, Height+100, -1, -1, WindowHandle)</l>
+<c></c>
+<l>dev_display (Image)</l>
+<c>*灰度变化</c>
+<l>rgb1_to_gray (Image, GrayImage)</l>
+<l>gen_ellipse (ROI_0, 154, 241, rad(-0), 78, 28)</l>
+<c></c>
+<l>*gen_ellipse (ROI_0, 84, 92, rad(-131.855), 64.4438, 34.6195)</l>
+<l>area_center (ROI_0, Area, RowRef1, ColumnRef1)</l>
+<l>reduce_domain (GrayImage, ROI_0, ImageReduced)</l>
+<l>dev_display (ImageReduced)</l>
+<c>*阈值分隔</c>
+<l>threshold (ImageReduced, Regions, 39, 64)</l>
+<c>*区域生长</c>
+<l>fill_up_shape (Regions, RegionFillUp, 'area', 1, 100)</l>
+<l>dilation_rectangle1 (RegionFillUp, RegionDilation, 4,4)</l>
+<l>erosion_rectangle1 (RegionDilation, RegionClosing, 2, 2)</l>
+<c>*联通</c>
+<l>connection (RegionClosing, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 3393.52, 3800.93)</l>
+<c></c>
+<c>*减少未选中的区域</c>
+<l>reduce_domain (GrayImage, SelectedRegions, ImageReduced1)</l>
+<c>*创建模板</c>
+<l>create_scaled_shape_model (ImageReduced1, 'auto', 0, 6.29, 'auto', 0.7, 1.3, 'auto', 'auto', 'use_polarity', 'auto', 'auto', ModelID)</l>
+<c>*得到模型轮廓</c>
+<l>get_shape_model_contours (ModelContours, ModelID, 1)</l>
+<c>*获得中心</c>
+<l>area_center (SelectedRegions, Area1, RowRef, ColumnRef)</l>
+<c>*刚性变换矩阵</c>
+<l>vector_angle_to_rigid (0, 0, 0, RowRef, ColumnRef, 0, HomMat2D)</l>
+<c>*XLD轮廓 仿射变换</c>
+<l>affine_trans_contour_xld (ModelContours, ContoursAffineTrans, HomMat2D)</l>
+<l>dev_display (Image)</l>
+<l>dev_display (ContoursAffineTrans)</l>
+<c></c>
+<c>*二维测量</c>
+<l>*  create_metrology_model (MetrologyHandle)</l>
+<l>* set_metrology_model_image_size (MetrologyHandle, Width, Height)</l>
+<l>* draw_ellipse (WindowHandle, RowRef2, ColumnRef2, Phi, Radius1, Radius2)</l>
+<c>*卡边尺长</c>
+<l>* MeasureLength1:=30</l>
+<c>*卡边尺宽</c>
+<l>* MeasureLength2:=5</l>
+<l>* add_metrology_object_ellipse_measure (MetrologyHandle, RowRef2, ColumnRef2, Phi, Radius1, Radius2, 20, 5, 1, 30, [], [], Index)</l>
+<l>* get_metrology_object_measures (Contours, MetrologyHandle, 'all', 'all', RowRef2, RowRef2)</l>
+<c></c>
+<c></c>
+<l>* dev_clear_window ()</l>
+<l>* dev_display (ImageReduced1)</l>
+<l>* add_metrology_object_ellipse_measure (MetrologyHandle, RowRef, ColumnRef, HomMat2D, HomMat2D, HomMat2D, 20, 5, 1, 30, [], [], Index)</l>
+<l>* get_metrology_object_measures (Contours, MetrologyHandle, 'all', 'all', Row1, Column1)</l>
+<c>* 测量并拟合计量模型的所有计量对象的几何形状</c>
+<l>* apply_metrology_model (ImageReduced1, MetrologyHandle)</l>
+<l>* dev_set_color ('green')</l>
+<c>*获取测量结果轮廓</c>
+<l>* get_metrology_object_result_contour (Contour, MetrologyHandle, 0, 'all', 1.5)</l>
+<c>*用椭圆或椭圆弧近似XLD。</c>
+<l>* fit_ellipse_contour_xld (Contour, 'fitzgibbon', -1, 0, 0, 200, 3, 2, Row2, Column2, Phi1, Radius11, Radius21, StartPhi, EndPhi, PointOrder)</l>
+<c>*生成一个十字形状的XLD轮廓。</c>
+<l>* gen_cross_contour_xld (Cross,  Row2, Column2,  Radius11*2.5, Phi1)</l>
+<c>*输出椭圆参数结果</c>
+<l>* str := ['椭圆中心：'+Row2$'10.2f'+',' +Column2$'10.2f','椭圆倾角：'+Phi1$'10.8f','长轴长：'+(Radius11*2)$'10.2f','短轴长：'+Radius21$'10.2f']</l>
+<l>* for i :=0 to |str|-1 by 1</l>
+<l>*   set_tposition (WindowHandle, 12+16*i, 12)</l>
+<l>*   write_string (WindowHandle, str[i])  </l>
+<l>* endfor</l>
+<l>* clear_metrology_model (MetrologyHandle)</l>
+<l>* dump_window (WindowHandle, 'png', '椭圆测量结果')</l>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<l>stop()</l>
+<l>read_image (Image1, 'E:/HALCON/形态学/lQLPJxbj8bDSBT3NAYHNAhCwN_ysG5D7_xIDdoeptsCbAA_528_385.png')</l>
+<l> dev_display (Image1)</l>
+<c>        *匹配，得到点、位置、角度、尺度、匹配值</c>
+<l>    find_scaled_shape_model (Image1, ModelID, 0, 6.29, 0.8, 1.2, 0.5, 0, 0.5, 'least_squares', 5, 0.8, Row, Column, Angle, Scale, Score)</l>
+<c> </c>
+<c>   </c>
+<c> </c>
+<l>    for I:=0 to |Score| -1 by 1</l>
+<c>        </c>
+<c>    *齐次变换矩阵</c>
+<l>        hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>        hom_mat2d_translate (HomMat2DIdentity, Row[I], Column[I], HomMat2DTranslate)</l>
+<l>        hom_mat2d_rotate (HomMat2DTranslate, Angle[I], Row[I], Column[I], HomMat2DRotate)</l>
+<l>        hom_mat2d_scale (HomMat2DRotate, Scale[I], Scale[I], Row[I], Column[I], HomMat2DScale)</l>
+<c>        *应用一个任意的仿射二维变换到XLD轮廓</c>
+<l>        affine_trans_contour_xld (ModelContours, ContoursAffineTrans, HomMat2DScale)</l>
+<c>        *序号</c>
+<c>        </c>
+<l>    set_display_font (WindowHandle, 20, 'mono', 'true', 'false')</l>
+<l>        set_tposition (WindowHandle, Row[I]+20, Column[I]+25)</l>
+<l>       write_string(WindowHandle,I+1 )</l>
+<c>        *角度</c>
+<l>       * set_tposition (WindowHandle, Row[I]+30, Column[I]+30)</l>
+<l>       * write_string(WindowHandle,(57.3*Angle[I])$'#.1f' )</l>
+<c>        *行坐标</c>
+<l>   *      set_tposition (WindowHandle, Row[I]+50, Column[I]+15)</l>
+<l>    *    write_string (WindowHandle, Row[I]$'#.1f')</l>
+<c>        *列坐标</c>
+<l>     * set_tposition (WindowHandle, Row[I]+50, Column[I]+55)</l>
+<l>     *   write_string (WindowHandle, Column[I]$'#.1f')</l>
+<c>        *显示结果</c>
+<l>        dev_display (ContoursAffineTrans)</l>
+<c>*二维测量</c>
+<l>         create_metrology_model (MetrologyHandle)</l>
+<l>set_metrology_model_image_size (MetrologyHandle, Width, Height)</l>
+<l>draw_ellipse (WindowHandle, RowRef2, ColumnRef2, Phi, Radius1, Radius2)</l>
+<c>*卡边尺长</c>
+<l>MeasureLength1:=30</l>
+<c>*卡边尺宽</c>
+<l>MeasureLength2:=5</l>
+<l>add_metrology_object_ellipse_measure (MetrologyHandle, RowRef2, ColumnRef2, Phi, Radius1, Radius2, 20, 5, 1, 30, [], [], Index)</l>
+<l>get_metrology_object_measures (Contours, MetrologyHandle, 'all', 'all', RowRef2, RowRef2)</l>
+<l>        apply_metrology_model (GrayImage, MetrologyHandle)</l>
+<l>        get_metrology_object_result_contour (Contour, MetrologyHandle, 'all', 'all', 1.5)</l>
+<c>        *拟合，计算轮廓结果</c>
+<l>fit_ellipse_contour_xld (Contour, 'fitzgibbon', -1, 0, 0, 200, 3, 2, RowRef2, ColumnRef2, Phi1, Radius1, Radius2, StartPhi, EndPhi, PointOrder)</l>
+<c></c>
+<c>*显示结果</c>
+<c>*椭圆的中心点</c>
+<l>gen_cross_contour_xld (Cross, RowRef2, ColumnRef2, Radius1*2, Phi)</l>
+<l>set_display_font (WindowHandle, 12, 'mono', 'true', 'false')</l>
+<l>disp_message (WindowHandle, ['中心坐标：('+[RowRef2]$'#.1f'+','+[ColumnRef2]$'#.1f'+')','斜率：'+[57.3*Phi1]$'#.1f','最大半长：'+[Radius1]$'#.1f','最小半长：'+[Radius2]$'#.1f'], 'window', Row[I]+50, Column[I]-30, 'black', 'true')</l>
+<c>*清除句柄</c>
+<l>*disp_message (WindowHandle, ['中心坐标：('+[RowRef2]$'#.1f'+','+[ColumnRef2]$'#.1f'+')'], 'window', Row[I]+50, Column[I]-30, 'green', 'false')</l>
+<l>clear_metrology_model (MetrologyHandle)</l>
+<c></c>
+<c></c>
+<c>    </c>
+<l> endfor</l>
+<l>disp_message (WindowHandle, '累计椭圆个数：', 'window', 10, 10, 'black', 'true')</l>
+<l>disp_message (WindowHandle, I, 'window', 10, 100, 'black', 'true')</l>
+<l>stop()</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
