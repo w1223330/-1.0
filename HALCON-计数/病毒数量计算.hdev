@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image (Image, '病毒计数.jpg')</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_close_window()</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<c>* 灰度转换</c>
+<l>rgb1_to_gray(Image,GrayImage)</l>
+<l>threshold(GrayImage,Regions,41,197) </l>
+<c>* 区域两桶</c>
+<l>connection(Regions,ConnectedRegion)</l>
+<c>* 选面积确定</c>
+<l>select_shape(ConnectedRegion, SelectedRegions, 'area', 'and', 1000, 1300)</l>
+<c>* 圆度确定</c>
+<l>select_shape (SelectedRegions, SelectedRegions2, 'roundness', 'and', 0.5, 0.94)</l>
+<c>* 绿色  病毒计数</c>
+<l>count_obj(SelectedRegions2,Number)</l>
+<c>* 显示结果</c>
+<l>set_tposition(WindowHandle, 10, 10)</l>
+<l>write_string(WindowHandle,'病毒数量=')</l>
+<l>set_tposition(WindowHandle, 10, 70)</l>
+<l>write_string(WindowHandle,Number)</l>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

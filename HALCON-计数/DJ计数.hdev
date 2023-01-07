@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image (Image, 'DJ.jpg')</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_close_window()</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<c>* 灰度转换</c>
+<l>rgb1_to_gray(Image,GrayImage)</l>
+<c>* 黑色头发数量，黑头发阈值不同65--120</c>
+<l>threshold(GrayImage,Regions,65,120) </l>
+<c>* 区域连通</c>
+<l>connection(Regions,ConnectedRegion)</l>
+<c>* 黑头发面积1100--2600 的计数</c>
+<l>select_shape(ConnectedRegion, SelectedRegions1, 'area', 'and', 1100, 2600)</l>
+<l>count_obj(SelectedRegions1,Number1)</l>
+<c></c>
+<c>* 黄色色头发数量，黄头发阈值不同200--230，并区域连通</c>
+<l>threshold(GrayImage,Region,200,230) </l>
+<l>connection(Region,ConnectedRegion2)</l>
+<c>* 腐蚀系数 6</c>
+<l>erosion_circle (ConnectedRegion2, RegionErosion, 6)</l>
+<c>* 不加下面connection区域连通，则2、3为一体</c>
+<l>connection(RegionErosion,ConnectedRegion3)</l>
+<l>select_shape(ConnectedRegion3, SelectedRegions3, 'area', 'and', 700, 1500)</l>
+<c>* 黄头发数量</c>
+<l>count_obj(SelectedRegions3,Number2)</l>
+<c>* 总人数 renshu</c>
+<l>renshu:=Number1+Number2</l>
+<c>* 显示结果</c>
+<l>set_tposition(WindowHandle, 10, 10)</l>
+<l>write_string(WindowHandle,'DJ数量=')</l>
+<l>set_tposition(WindowHandle, 10, 70)</l>
+<l>write_string(WindowHandle,renshu)</l>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
