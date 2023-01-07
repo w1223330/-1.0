@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 数字字符识别</c>
+<l>*read_image (Image, '字符识别分类1.jpg')  // 5个字符</l>
+<l>read_image (Image, '10个数字.jpg')       //  识别一般</l>
+<l>*read_image (Image, '10个大写字母.jpg')    //  识别一般</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<c>* 灰度值线性变换，缩放图像的灰度值</c>
+<l>scale_image (Image, ImageScaled, 1, 1)</l>
+<c>* 图像强化</c>
+<l>emphasize (ImageScaled, ImageEmphasize, 20, 20, 1)</l>
+<l>threshold (ImageEmphasize, Region, 30, 220)</l>
+<l>rgb1_to_gray (Image, GrayImage)</l>
+<l>threshold (GrayImage, Region, 0, 160)</l>
+<l>connection (Region, ConnectedRegions)</l>
+<c>* 排序，从前水平递增</c>
+<l>sort_region (ConnectedRegions, SortedRegions, 'first_point', 'true', 'row')</l>
+<c>*读取匪类器，数字和字母</c>
+<l>read_ocr_class_mlp ('Document_0-9A-Z_NoRej.omc', OCRHandle)</l>
+<l>*read_ocr_class_mlp ('Document_0-9_NoRej.omc', OCRHandle)</l>
+<c>*读多个字符，class 是数组</c>
+<l> do_ocr_multi_class_mlp (SortedRegions, ImageEmphasize, OCRHandle, Class, Confidence)</l>
+<l>* do_ocr_multi_class_mlp (SortedRegions, ConnectedRegions, OCRHandle, Class, Confidence)</l>
+<l>tuple_number (Class[2], Number_b)</l>
+<l>tuple_number (Class[3], Number_s)</l>
+<l>*tuple_number (Class[4], Number_g)</l>
+<c>* 显示结果数字,用Document_0-9_NoRej.omc数字识别好，用Document_0-9A-Z_NoRej.omc,数字0与字母O混。</c>
+<l>*jieguo:=Number_b*100+Number_g*10 +Number_g</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<l>*disp_message (WindowHandle, Class, 'window', 12, 12, 'black', 'true')</l>
+<l>disp_message (WindowHandle, '结果='+Class[0]+Class[1]+Class[2]+Class[3]+Class[4]+Class[5], 'window', 12, 12, 'black', 'true')</l>
+<l>clear_ocr_class_mlp (OCRHandle)</l>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c></c>
+<l>read_image (Image, '素材2.png')</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle)</l>
+<l>rgb1_to_gray (Image, Image) </l>
+<c></c>
+<c>*要训练的字库</c>
+<l>txtName:=['大','家','好','欢','迎','收','看']</l>
+<c>*创建分类器</c>
+<c>*字符大小8*10</c>
+<l>create_ocr_class_svm (8, 10, 'constant', 'default', txtName, 'rbf', 0.02, 0.05, 'one-versus-all', 'normalization', 10, OCRHandle)</l>
+<c></c>
+<c>*阈值分割</c>
+<l>threshold (Image, Region, 0, 200)</l>
+<c>*进行膨胀</c>
+<l>closing_circle (Region, RegionClosing, 3.5)</l>
+<l>connection (RegionClosing, ConnectedRegions)</l>
+<c>*膨胀后的和阈值分割后的区域，求交接。（提取出每个字符分割后的完整区域）</c>
+<l>intersection (ConnectedRegions, Region, RegionIntersection)</l>
+<c></c>
+<c>*通过外接矩形筛选，去掉干扰项，只保留字符区域</c>
+<l>select_shape (RegionIntersection, SelectedRegions, ['rect2_len1','rect2_len2'], 'and', [6,6], [12,12])</l>
+<c>*对筛选出来的字符进行排序</c>
+<l>sort_region (SelectedRegions, SortedRegions, 'first_point', 'true', 'column')</l>
+<c></c>
+<c>*循环保存样本</c>
+<l>for i := 1 to |txtName| by 1</l>
+<l>    select_obj (SortedRegions, obj, i)</l>
+<c>    *写入样本，第一次需要先创建样本,然后就可以往样本里面添加了 </c>
+<l>    if(i==1)</l>
+<l>        write_ocr_trainf (obj, Image, txtName[i-1], 'train_ocr')</l>
+<l>    else</l>
+<l>        append_ocr_trainf (obj, Image, txtName[i-1], 'train_ocr')</l>
+<l>    endif</l>
+<c></c>
+<l>    stop()</l>
+<l>endfor</l>
+<c></c>
+<c>*训练样本</c>
+<c>*参数2：训练样本文件名，和前面创建的样本名一致。</c>
+<c>*参数3：偏差，达不到的话会一直训练</c>
+<l>trainf_ocr_class_svm (OCRHandle, 'train_ocr', 0.001, 'default')</l>
+<c> * 两种方式显示汉字</c>
+<l>disp_message (WindowHandle, txtName, 'window', 0, 0, 'blue', 'true')</l>
+<l>set_tposition(WindowHandle, 10, 130)</l>
+<l>write_string(WindowHandle,'汉字：')</l>
+<l>set_tposition(WindowHandle, 10, 160)</l>
+<l>write_string(WindowHandle,txtName)</l>
+<c>*保存训练结果</c>
+<l>write_ocr_class_svm (OCRHandle, '1.osc')</l>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

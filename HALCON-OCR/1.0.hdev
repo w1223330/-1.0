@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 瓶盖数字识别</c>
+<c> </c>
+<l>read_image (Image, 'E:/HALCON/OCR/pg.jpg')       //  识别一般</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<l>dev_display (Image)</l>
+<l>threshold (Image, Region, 138, 255)</l>
+<l>connection (Region, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 70000, 90000)</l>
+<l>reduce_domain (Image, SelectedRegions, ImageReduced)</l>
+<l>mean_image (ImageReduced, ImageMean, 35, 35)</l>
+<l>sub_image (ImageReduced, ImageMean, ImageSub, 4, 128)</l>
+<c></c>
+<l>rgb1_to_gray (ImageSub, GrayImage)</l>
+<l>dyn_threshold (ImageSub, ImageMean, RegionDynThresh, 125, 'dark')</l>
+<l>connection (RegionDynThresh, ConnectedRegions2)</l>
+<c>* 选字高度36--50</c>
+<l>select_shape (ConnectedRegions2, SelectedRegions2, 'height', 'and', 36, 50)</l>
+<c>*选行</c>
+<l>select_shape (ConnectedRegions2, SelectedRegions3, 'row', 'and', 330, 357)</l>
+<l>select_shape (SelectedRegions3, SelectedRegions4, 'height', 'and', 36, 50)</l>
+<c>* 排序，从前水平递增,first是第一个点</c>
+<l>sort_region (SelectedRegions4, SortedRegions, 'first_point', 'true', 'row')</l>
+<c>*读取匪类器，数字和字母</c>
+<l>read_ocr_class_mlp ('Document_0-9_Rej.omc', OCRHandle)</l>
+<c></c>
+<c>*读多个字符，Class 是数组</c>
+<l> do_ocr_multi_class_mlp (SortedRegions, ImageReduced, OCRHandle, Class, Confidence)</l>
+<c> </c>
+<l>letter:=''</l>
+<l>for Index:=0 to |Class|-1 by 1</l>
+<l>    letter:=letter+Class[Index]</l>
+<l>endfor</l>
+<c></c>
+<l>disp_message (WindowHandle, '日期='+letter, 'window', 12, 12, 'black', 'true')</l>
+<l>clear_ocr_class_mlp (OCRHandle)</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

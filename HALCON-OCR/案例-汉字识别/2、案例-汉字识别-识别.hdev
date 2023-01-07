@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.2.0">
+<procedure name="main">
+<interface/>
+<body>
+<c></c>
+<l>read_image (Image, '素材2.png')</l>
+<l>rgb1_to_gray (Image, Image) </l>
+<c></c>
+<c>*阈值分割</c>
+<l>threshold (Image, Region, 0, 200)</l>
+<c>*进行膨胀</c>
+<l>closing_circle (Region, RegionClosing, 2.5)</l>
+<l>connection (RegionClosing, ConnectedRegions)</l>
+<c>*膨胀后的和阈值分割后的区域，求交接。（提取出每个字符分割后的完整区域）</c>
+<l>intersection (ConnectedRegions, Region, RegionIntersection)</l>
+<c></c>
+<c>*通过外接矩形筛选，去掉干扰项，只保留字符区域</c>
+<l>select_shape (RegionIntersection, SelectedRegions, ['rect2_len1','rect2_len2'], 'and', [12,12], [18,18])</l>
+<c>*对筛选出来的字符进行排序</c>
+<l>sort_region (SelectedRegions, SortedRegions, 'first_point', 'true', 'column')</l>
+<c></c>
+<c>*统计字符区域数量</c>
+<l>count_obj (SortedRegions, Number)</l>
+<l>* if(Number!=21)</l>
+<l>    stop()</l>
+<l>* endif</l>
+<c></c>
+<c>*读取自己训练的样本库</c>
+<l>read_ocr_class_svm ('1.osc', OCRHandle)</l>
+<c></c>
+<c>*识别</c>
+<l>do_ocr_multi_class_svm (SortedRegions, Image, OCRHandle, Class)</l>
+<c></c>
+<c>*将识别的结果，写入本地txt</c>
+<l>open_file ('1.txt', 'output', FileHandle)</l>
+<l>fwrite_string (FileHandle, Class)</l>
+<l>close_file (FileHandle)</l>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
