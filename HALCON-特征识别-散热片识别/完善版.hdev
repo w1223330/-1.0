@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image (Image, 'A0.bmp')</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>dev_close_window ()</l>
+<l>dev_open_window_fit_image (Image, 0, 0, -1, -1, WindowHandle)</l>
+<l>dev_display (Image)</l>
+<c>*灰度变化</c>
+<l>rgb1_to_gray (Image, GrayImage)</l>
+<c>*画出矩形</c>
+<l>gen_rectangle1 (ROI_0, 361.225, 442.713, 937.6, 1674.96)</l>
+<c></c>
+<l>reduce_domain (GrayImage, ROI_0, ImageReduced)</l>
+<l>dev_display (ImageReduced)</l>
+<c>*阈值分隔</c>
+<l>threshold (ImageReduced, Regions, 49, 255)</l>
+<c>*区域生长</c>
+<l>fill_up_shape (Regions, RegionFillUp, 'area', 1, 10)</l>
+<l>dilation_rectangle1 (RegionFillUp, RegionDilation, 4,4)</l>
+<l>erosion_rectangle1 (RegionDilation, RegionClosing, 4, 4)</l>
+<c>*闭运算</c>
+<l>*closing_rectangle1 (RegionFillUp, RegionClosing, 6, 6)</l>
+<c>*联通</c>
+<l>connection (RegionClosing, ConnectedRegions)</l>
+<c>*面积选择</c>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 400000, 450000)</l>
+<c>*减少未选中的区域</c>
+<l>reduce_domain (GrayImage, SelectedRegions, ImageReduced1)</l>
+<c>*创建模板</c>
+<l>create_scaled_shape_model (ImageReduced1, 'auto', 0, 6.29, 'auto', 0.7, 1.3, 'auto', 'auto', 'use_polarity', 'auto', 'auto', ModelID)</l>
+<c>*得到模型轮廓</c>
+<l>get_shape_model_contours (ModelContours, ModelID, 1)</l>
+<c>*获得中心</c>
+<l>area_center (SelectedRegions, Area1, RowRef, ColumnRef)</l>
+<c>*刚性变换矩阵</c>
+<l>vector_angle_to_rigid (0, 0, 0, RowRef, ColumnRef, 0, HomMat2D)</l>
+<c>*XLD轮廓 仿射变换</c>
+<l>affine_trans_contour_xld (ModelContours, ContoursAffineTrans, HomMat2D)</l>
+<l>dev_display (Image)</l>
+<l>dev_display (ContoursAffineTrans)</l>
+<l>stop()</l>
+<c></c>
+<c>*暂存数组</c>
+<c>*横纵坐标</c>
+<l>Row:=[]</l>
+<l>Col:=[]</l>
+<c>*角度</c>
+<l>Ang:=[]</l>
+<c>*散热片个数</c>
+<l>geshu := 0</l>
+<c></c>
+<c>*循环</c>
+<l>for Index := 1 to 8 by 1 or geshu &gt; 100</l>
+<c>    *输入目标图片</c>
+<l>        read_image (Image1, 'A'+Index)</l>
+<l>        dev_display (Image1)</l>
+<c>        *匹配，得到点、位置、角度、尺度、匹配值</c>
+<l>    find_scaled_shape_model (Image1, ModelID, 0, 6.29, 0.5, 1.4, 0.4, 0, 0.5, 'least_squares', 5, 0.8, Row, Column, Angle, Scale, Score)</l>
+<l>    for I:=0 to |Score| -1 by 1</l>
+<c>    *齐次变换矩阵</c>
+<l>        hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>        hom_mat2d_translate (HomMat2DIdentity, Row[I], Column[I], HomMat2DTranslate)</l>
+<l>        hom_mat2d_rotate (HomMat2DTranslate, Angle[I], Row[I], Column[I], HomMat2DRotate)</l>
+<l>        hom_mat2d_scale (HomMat2DRotate, Scale[I], Scale[I], Row[I], Column[I], HomMat2DScale)</l>
+<c>        *应用一个任意的仿射二维变换到XLD轮廓</c>
+<l>        affine_trans_contour_xld (ModelContours, ContoursAffineTrans, HomMat2DScale)</l>
+<c>        </c>
+<c>        *序号</c>
+<l>        set_tposition (WindowHandle, Row[I]-20, Column[I])</l>
+<l>        write_string(WindowHandle,I+1 )</l>
+<c>        *角度</c>
+<l>          set_tposition (WindowHandle, Row[I]+35, Column[I])</l>
+<l>        write_string(WindowHandle,'角度（        ）')</l>
+<l>        set_tposition (WindowHandle, Row[I]+35, Column[I]+110)</l>
+<l>        write_string(WindowHandle,(57.3*Angle[I])$'#.1f' )</l>
+<c>        *行坐标</c>
+<l>             set_tposition (WindowHandle, Row[I]+90, Column[I])</l>
+<l>        write_string (WindowHandle, '坐标（         ，          ）')</l>
+<l>         set_tposition (WindowHandle, Row[I]+90, Column[I]+110)</l>
+<l>        write_string (WindowHandle, Row[I]$'#.1f')</l>
+<c>        *列坐标</c>
+<l>      set_tposition (WindowHandle, Row[I]+90, Column[I]+230)</l>
+<l>        write_string (WindowHandle, Column[I]$'#.1f')</l>
+<c>        *显示结果</c>
+<l>dev_display (ContoursAffineTrans)</l>
+<l>  R[I]:=[Row[I]$'#.1f']</l>
+<l>        C[I]:=[Column[I]$'#.1f']</l>
+<l>        A[I]:=[[57.3*Angle[I]]$'#.1f']</l>
+<l>endfor</l>
+<c>*计数</c>
+<l>geshu := geshu+I</l>
+<l>   disp_message (WindowHandle, '累计散热片个数：', 'window', 10, 10, 'black', 'true')</l>
+<l>    disp_message (WindowHandle, geshu, 'window', 10, 110, 'black', 'true')</l>
+<l>    stop()</l>
+<l>     endfor</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
