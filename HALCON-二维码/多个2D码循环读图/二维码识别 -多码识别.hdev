@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 多个二维码识别，码图前部分图名称为 “二维码6”。</c>
+<l>ImageFiles := '二维码6'</l>
+<l>read_image (Image, ImageFiles + '1')</l>
+<c>*5个二维码图</c>
+<l>ImageNum :=9</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<c></c>
+<l>dev_open_window_fit_image (Image, 0+200, 0, -1, -1, WindowHandle)</l>
+<l>set_display_font (WindowHandle, 16, 'mono', 'true', 'false')</l>
+<l>dev_set_line_width (3)</l>
+<l>dev_set_color ('green')</l>
+<c></c>
+<l>Message := '该例显示如何 This simple program show how to  '</l>
+<l>Message[1] := '顺序读取 QR码 read Micro QR data codes in a sequence'</l>
+<l>disp_message (WindowHandle, Message, 'window', 12, 12, 'black', 'true')</l>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<c></c>
+<c>* 码类型</c>
+<l>create_data_code_2d_model ('QR Code', [], [], DataCodeHandle)</l>
+<c>* 参数默认，增强识别</c>
+<l>set_data_code_2d_param (DataCodeHandle, 'default_parameters', 'enhanced_recognition')</l>
+<c>* 500ms 识别有效</c>
+<l>set_data_code_2d_param (DataCodeHandle, 'timeout', '500')</l>
+<c>* 白底黑码</c>
+<l>set_data_code_2d_param (DataCodeHandle, 'polarity', 'dark_on_light')</l>
+<c>* 循环读多个二维码，数量=ImageNum；</c>
+<l>for Index := 1 to ImageNum by 1</l>
+<c>    * 文件前半部名称+1位数字</c>
+<l>    read_image (Image, ImageFiles + Index$'.1d')</l>
+<c>    * 识别二维码</c>
+<l>    find_data_code_2d (Image, SymbolXLDs, DataCodeHandle, [], [], ResultHandles, DecodedDataStrings)</l>
+<c>   </c>
+<c>    * 显示结果 Display the results</c>
+<l>    dev_display (Image)</l>
+<c>    * 绿边框显示</c>
+<l>    dev_display (SymbolXLDs)</l>
+<c>    * 显示图序号</c>
+<l>    disp_message (WindowHandle, 'Image ' + Index + ' of ' + ImageNum, 'window', 12, 12, 'black', 'true')</l>
+<c>    * 显示码的字符串</c>
+<l>    disp_message (WindowHandle, DecodedDataStrings, 'window', 40, 12, 'black', 'true')</l>
+<c>    * 第2个码的用途</c>
+<l>    if (DecodedDataStrings == 'https://u.wechat.com/EOy9EP9b7UocpxOVXcjOdk0')</l>
+<l>        disp_message (WindowHandle, '课程了解 code', 'window', 70, 12, 'red', 'true')</l>
+<c>  </c>
+<c>    * 第2个码的用途</c>
+<l>    elseif (DecodedDataStrings == '\\000026https://qm.qq.com/cgi-bin/qm/qr?k=w4je-UIwQr70-r2TXr6x-syr31qV_MTt&amp;authKey=7HzMqC/PzQ8Q4O/KnpGQ7WqQMztUIMNVoceZTVqNeZPe12CBqdbKNggXTU6Gudj+&amp;noverify=0')</l>
+<l>        disp_message (WindowHandle, '课程咨询 code', 'window', 70, 12, 'blue', 'true')</l>
+<c>   </c>
+<c>    * 第3个码的用途</c>
+<l>    elseif (DecodedDataStrings == 'https://lgo.h5.xeknow.com/s/VCzKi')</l>
+<l>        disp_message (WindowHandle, '课程购买 code', 'window', 70, 12, 'green', 'true')</l>
+<l>    else</l>
+<l>        disp_message (WindowHandle, '其它二维码 code', 'window', 70, 12, 'orange', 'true')              </l>
+<l>    endif    </l>
+<c> </c>
+<c>     </c>
+<c>  * 如果没图，则提示</c>
+<c>    * If no data code could be found</c>
+<l>    if (|DecodedDataStrings| == 0)</l>
+<l>        disp_message (WindowHandle, '  无二维码图可识别  ', 'window', 70, 12, 'red', 'true')</l>
+<l>    endif</l>
+<c>  </c>
+<c>    * 小于图的数量，就继续循环。Deactivate the following lines to run the program without breaks</c>
+<l>    if (Index &lt; ImageNum)</l>
+<l>        disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>        stop ()</l>
+<l>    endif</l>
+<l>endfor</l>
+<c>* 清除码句柄，必须有</c>
+<l>clear_data_code_2d_model (DataCodeHandle)</l>
+<l>disp_message (WindowHandle, '    识别结束    ', 'window', 70, 12, 'red', 'true')</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

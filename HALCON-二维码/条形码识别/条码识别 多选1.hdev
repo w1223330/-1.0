@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 4个码，选择其中一个条码识别</c>
+<l>*read_image (Image, '一维码1.jpg')</l>
+<l>*read_image (Image, '一维码2.jpg')</l>
+<l>read_image (Image, '一维码4.jpg')</l>
+<l>*read_image (Image, '一维码5.jpg')</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<c>* 灰度值线性变换，缩放图像的灰度值</c>
+<l>scale_image (Image, ImageScaled, 1, 50)</l>
+<c>* 图像强化</c>
+<l>emphasize (ImageScaled, ImageEmphasize, 50, 50, 1)</l>
+<c>* 码模式</c>
+<l>create_bar_code_model ([], [], BarCodeHandle)</l>
+<l>set_bar_code_param (BarCodeHandle, 'barcode_width_min', 300)</l>
+<l>find_bar_code (ImageScaled, SymbolRegions, BarCodeHandle, 'auto', DecodedDataStrings)</l>
+<l>clear_bar_code_model (BarCodeHandle)</l>
+<l>a:=DecodedDataStrings</l>
+<l>if(a='4008535118906')</l>
+<l>    disp_message (WindowHandle, '1号 识别成功：OK', 'window',12, 12, 'black', 'true')</l>
+<l>    disp_message (WindowHandle, '匹配条码数值='+a, 'window', 32, 12, 'black', 'true')</l>
+<l>else   </l>
+<l>    disp_message (WindowHandle, '识别失败：NG', 'window',12, 12, 'black', 'true')</l>
+<l>    disp_message (WindowHandle, '不是4008535118906，条码数值='+a, 'window', 32, 12, 'black', 'true')</l>
+<l>endif</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

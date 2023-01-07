@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 二维码匹配识别实验</c>
+<c>* 不匹配的3个二维码</c>
+<l>*read_image (Image, '3个二维码.jpg')</l>
+<l>read_image (Image, 'B2-1')</l>
+<l>*read_image (Image, '二维码5.png')</l>
+<c>* 匹配的二维码</c>
+<l>*read_image (Image, '条码二维码.jpg')</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<c>* 码类型</c>
+<l>create_data_code_2d_model ('QR Code', [], [], DataCodeHandle)</l>
+<c>* 参数默认，最大识别</c>
+<l>*set_data_code_2d_param (DataCodeHandle, 'default_parameters', 'maximum_recognition')</l>
+<c>* 参数默认，增强识别</c>
+<l>set_data_code_2d_param (DataCodeHandle, 'default_parameters', 'enhanced_recognition')</l>
+<c>* 500ms 时间内识别有效</c>
+<l>set_data_code_2d_param (DataCodeHandle, 'timeout', '500')</l>
+<c>* 白底黑码的码图片</c>
+<l>set_data_code_2d_param (DataCodeHandle, 'polarity', 'dark_on_light')</l>
+<c>* 识别码动作</c>
+<l>find_data_code_2d (Image, SymbolXLDs, DataCodeHandle, 'stop_after_result_num', 3, ResultHandles, DecodedDataStrings)</l>
+<c>    * 显示结果 Display the results</c>
+<l>    dev_display (Image)</l>
+<c>    * 码边框显示</c>
+<l>    dev_display (SymbolXLDs)</l>
+<c>* 清除码模型</c>
+<l>clear_data_code_2d_model (DataCodeHandle)</l>
+<c></c>
+<l>a:=DecodedDataStrings</l>
+<c>*匹配的  “条码二维码.jpg”</c>
+<l>if(a='http://weixin.qq.com/r/tzkZAXHENyxIrTVi92yl')</l>
+<l>    disp_message (WindowHandle, '匹配识别成功：OK', 'window',12, 12, 'black', 'true')</l>
+<l>    disp_message (WindowHandle, '条码数值='+a, 'window', 32, 12, 'black', 'true')</l>
+<l>endif</l>
+<c>*不匹配的其它二维码</c>
+<l>if(a!='http://weixin.qq.com/r/tzkZAXHENyxIrTVi92yl') </l>
+<l>    disp_message (WindowHandle, '匹配识别失败：NG', 'window',12, 12, 'black', 'true')</l>
+<l>    disp_message (WindowHandle, '二维码值='+a, 'window', 32, 12, 'black', 'true')</l>
+<l>endif</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

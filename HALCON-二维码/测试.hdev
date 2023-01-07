@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>*read_image (Image, 'C:/Users/心怀暖阳/Desktop/HALCAN/条码 识别/单个二维码匹配实验/1个二维码.jpg')</l>
+<l>read_image (Image, 'C:/Users/心怀暖阳/Desktop/HALCAN/条码 识别/单个二维码匹配实验/条码二维码.jpg')</l>
+<c></c>
+<l>get_image_size (Image, Width, Height)</l>
+<l>dev_close_window ()</l>
+<l>dev_open_window (0, 0, Width, Height, 'black', WindowHandle)</l>
+<l>dev_display (Image)</l>
+<l>create_data_code_2d_model ('QR Code', [], [], DataCodeHandle)</l>
+<l>set_data_code_2d_param (DataCodeHandle, 'polarity', 'dark_on_light')</l>
+<l>set_data_code_2d_param (DataCodeHandle, 'default_parameters', 'enhanced_recognition')</l>
+<l>set_data_code_2d_param (DataCodeHandle, 'timeout', 500)</l>
+<l>find_data_code_2d (Image, SymbolXLDs, DataCodeHandle, [], [], ResultHandles, DecodedDataStrings)</l>
+<l>clear_data_code_2d_model (DataCodeHandle)</l>
+<c></c>
+<l>a:=DecodedDataStrings</l>
+<c>*匹配的  “条码二维码.jpg”</c>
+<l>if(a='http://weixin.qq.com/r/tzkZAXHENyxIrTVi92yl')</l>
+<l>    disp_message (WindowHandle, '匹配识别成功：OK', 'window',12, 12, 'black', 'true')</l>
+<l>    disp_message (WindowHandle, '条码数值='+a, 'window', 32, 12, 'black', 'true')</l>
+<l>endif</l>
+<c>*不匹配的其它二维码</c>
+<l>if(a!='http://weixin.qq.com/r/tzkZAXHENyxIrTVi92yl') </l>
+<l>    disp_message (WindowHandle, '匹配识别失败：NG', 'window',12, 12, 'black', 'true')</l>
+<l>    disp_message (WindowHandle, '二维码值='+a, 'window', 32, 12, 'black', 'true')</l>
+<l>endif</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

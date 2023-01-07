@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 多个1D条码识别</c>
+<l>read_image (Image, '一维码1.jpg')</l>
+<l>get_image_size(Image,W,H)</l>
+<l>dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<c>*6个二维码图</c>
+<l>ImageNum :=6</l>
+<c></c>
+<l>ImageFiles := '一维码'</l>
+<c></c>
+<c>* 循环读多个二维码，数量=ImageNum；</c>
+<l>for Index := 1 to ImageNum by 1</l>
+<c></c>
+<c>* 文件前半部名称+Index+1位数字</c>
+<l>  read_image (Image, ImageFiles + Index$'.1d')</l>
+<l>  get_image_size(Image,W,H)</l>
+<l>  dev_open_window(0,0,W,H,'black',WindowHandle) </l>
+<l>  dev_open_window_fit_image (Image, 0+200, 0, -1, -1, WindowHandle)</l>
+<l>  set_display_font (WindowHandle, 16, 'mono', 'true', 'false')</l>
+<l>  dev_set_line_width (3)</l>
+<l>  dev_set_color ('green')</l>
+<c>* 灰度值线性变换，缩放图像的灰度值</c>
+<l>  scale_image (Image, ImageScaled, 1, 50)</l>
+<c>* 图像强化</c>
+<l>  emphasize (ImageScaled, ImageEmphasize, 50, 50, 1)</l>
+<c>* 码模式</c>
+<l>  create_bar_code_model ([], [], BarCodeHandle)</l>
+<c>  </c>
+<c>* 设置1D码的参数，set_bar_code_param( BarCodeHandle, GenParamName, GenParamValue ) </c>
+<c>* BarCodeHandle  (输入条码模型的句柄)</c>
+<c>* GenParamName  （输入为查找和解码条形码而应调整的通用参数的名称）  </c>
+<c>* GenParamValue （输入为查找和解码条形码而调整的通用参数的值）</c>
+<l>  set_bar_code_param (BarCodeHandle, 'barcode_width_min', 100)</l>
+<c>  </c>
+<c>* 找到1D码的字符串</c>
+<l>  find_bar_code (ImageScaled, SymbolRegions, BarCodeHandle, 'auto', DecodedDataStrings)</l>
+<c>    * 1D 码值</c>
+<l>    a:=DecodedDataStrings</l>
+<l>    dev_display (Image)</l>
+<c>    * 绿边框显示</c>
+<l>    dev_display (SymbolRegions)</l>
+<c>    * 显示图序号</c>
+<l>    disp_message (WindowHandle, 'Image ' + Index + ' of ' + ImageNum, 'window', 12, 12, 'black', 'true')</l>
+<c>    * 显示码的字符串</c>
+<c>    </c>
+<c>    * 第1个码匹配 </c>
+<l>    if(a='4008535118906')</l>
+<l>     disp_message (WindowHandle, '1号码 识别成功：OK', 'window',40, 12, 'black', 'true')</l>
+<l>     disp_message (WindowHandle, '条码数值='+a, 'window', 70, 12, 'black', 'true')</l>
+<c>    </c>
+<c>    </c>
+<c>    * 第2个码的用途</c>
+<l>    elseif (DecodedDataStrings == '9787115508263')</l>
+<l>        disp_message (WindowHandle, '2号码 识别成功：OK', 'window', 40, 12, 'blue', 'true')</l>
+<l>        disp_message (WindowHandle, '条码数值='+a, 'window', 70, 12, 'black', 'true')</l>
+<c></c>
+<l>    else</l>
+<l>     disp_message (WindowHandle, '其它1D code', 'window', 40, 12, 'orange', 'true')  </l>
+<l>     disp_message (WindowHandle, '条码数值='+a, 'window', 70, 12, 'black', 'true')        </l>
+<c></c>
+<c></c>
+<l>    endif       </l>
+<c>     </c>
+<c>  * 如果没图，则提示</c>
+<c>    * If no data code could be found</c>
+<l>    if (|DecodedDataStrings| == 0)</l>
+<l>     disp_message (WindowHandle, '       No           ', 'window', 40, 12, 'orange', 'true')  </l>
+<l>     disp_message (WindowHandle, '       No           ', 'window', 70, 12, 'black', 'true')     </l>
+<l>     disp_message (WindowHandle, '  无1D 码图可识别    ', 'window', 90, 12, 'red', 'true')</l>
+<c>        </c>
+<c>        </c>
+<l>    endif</l>
+<c>    </c>
+<c>  * 如果小于图的数量，继续循环。否则退出for 循环。</c>
+<l>    if (Index &lt; ImageNum)</l>
+<l>        disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>        stop ()</l>
+<l>    endif</l>
+<l>endfor</l>
+<c>* 清除码句柄和设置，必须有</c>
+<l>clear_bar_code_model (BarCodeHandle)</l>
+<l>disp_message (WindowHandle, '       识别结束       ', 'window', 40, 12, 'red', 'true')</l>
+<l>disp_message (WindowHandle, '       END           ', 'window', 70, 12, 'black', 'true') </l>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
