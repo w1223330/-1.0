@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>    *读取一张图像</c>
+<l>    read_image (Image, '原图.jpg')</l>
+<c>    </c>
+<c>    *获取图像大小</c>
+<l>    get_image_size(Image, Width, Height)</l>
+<c>    </c>
+<c>    *关闭已经打开的窗口</c>
+<l>    dev_close_window ()</l>
+<c>    </c>
+<c>    *打开新窗口</c>
+<l>    dev_open_window(0, 0, Width, Height, 'black', WindowHandle)  //打开指定大小的窗口</l>
+<c>    </c>
+<c>    *对图像进行阈值操作</c>
+<l>    threshold (Image, Region, 0, 50)</l>
+<c>    </c>
+<c>    *对区域进行连通处理</c>
+<l>    connection (Region, ConnectedRegions)</l>
+<c>    </c>
+<c>    *过滤出产品的外轮廓区域</c>
+<l>    select_shape (ConnectedRegions, SelectedRegions, 'ra', 'and', 10, 200)</l>
+<c>    </c>
+<c>    *对轮廓区域进行填充</c>
+<l>    fill_up (SelectedRegions, RegionFillUp)</l>
+<c>    </c>
+<c>    *将区域转化为最小外接圆</c>
+<l>    shape_trans (SelectedRegions, RegionTrans, 'outer_circle')</l>
+<c>    </c>
+<c>    *通过补集运算获取产品缺口区域</c>
+<l>    difference (RegionTrans, RegionFillUp, RegionDifference)</l>
+<c>    </c>
+<c>    *对缺口区域进行腐蚀操作</c>
+<l>    erosion_circle (RegionDifference, RegionErosion, 1)</l>
+<c>    </c>
+<c>    *把一个区域转变为一个二进制字节图像。</c>
+<l>    region_to_bin (RegionErosion, BinImage, 255, 0, 656, 492)</l>
+<c>    </c>
+<c>    *对图像进行阈值操作</c>
+<l>    threshold (BinImage, Region1, 255, 255)</l>
+<c>    </c>
+<c>    *对阈值区域连通处理</c>
+<l>    connection (Region1, ConnectedRegions1)</l>
+<c>    </c>
+<c>    *设置输出对象显示颜色</c>
+<l>    dev_set_color('blue')</l>
+<c>    </c>
+<c>    *过滤出想要的缺口区域</c>
+<l>    select_shape (ConnectedRegions1, SelectedRegions1, ['ra','rb'], 'and', [5,1], [10,5])</l>
+<c>    </c>
+<c>    *统计出缺口的数目</c>
+<l>    count_obj (SelectedRegions1, Number)</l>
+<c>    </c>
+<c>    *显示图像</c>
+<l>    dev_display (Image)</l>
+<c>    </c>
+<c>    *显示缺陷区域</c>
+<l>    dev_display (SelectedRegions1)</l>
+<c></c>
+<c></c>
+<c>   </c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

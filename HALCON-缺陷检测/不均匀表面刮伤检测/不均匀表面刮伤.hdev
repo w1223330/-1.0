@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c></c>
+<c>*关闭程序计数器,图形变量更新,窗口图形更新</c>
+<l>dev_update_off ()</l>
+<c>*关闭已打开的窗口</c>
+<l>dev_close_window ()</l>
+<c></c>
+<c>************************************************第一步: 获取图像**************************************************</c>
+<c>*读取图像</c>
+<l>read_image (Image, 'image.png')</l>
+<c></c>
+<c>*获取图像大小</c>
+<l>get_image_size (Image, Width, Height)</l>
+<c></c>
+<c>*打开一个新窗口</c>
+<l>dev_open_window_fit_image (Image, 0, 0, Width, Width, WindowID)</l>
+<c></c>
+<c>*设置字体信息:字体大小为16，字体为mono,粗体，斜体</c>
+<l>set_display_font (WindowID, 16, 'mono', 'true', 'false')</l>
+<c></c>
+<c>*设置区域的填充方式</c>
+<l>dev_set_draw ('margin')</l>
+<c></c>
+<c>*设置线宽度</c>
+<l>dev_set_line_width (4)</l>
+<c></c>
+<c>*显示图像</c>
+<l>dev_display (Image)</l>
+<c></c>
+<c></c>
+<c> </c>
+<c>************************************************第二步: 分割图像**************************************************</c>
+<c></c>
+<c>* 均值滤波,滤波核大小为7*7</c>
+<l>mean_image (Image, ImageMean, 7, 7)</l>
+<c>* 用局部阈值进行分割</c>
+<l>dyn_threshold (Image, ImageMean, DarkPixels, 5, 'dark')</l>
+<c></c>
+<c>* 联通处理</c>
+<l>connection (DarkPixels, ConnectedRegions)</l>
+<c>* 输出对象的显示颜色的数目</c>
+<l>dev_set_colored (12)</l>
+<l>dev_display (Image)</l>
+<l>dev_display (ConnectedRegions)</l>
+<c></c>
+<c></c>
+<c>************************************************第三步: 处理区域**************************************************</c>
+<c></c>
+<c>* 过滤出缺陷区域</c>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 10, 1000)</l>
+<c></c>
+<l>dev_display (Image)</l>
+<c></c>
+<l>dev_display (SelectedRegions)</l>
+<c></c>
+<c></c>
+<c>* 将SelectedRegions中的所有区域合并</c>
+<l>union1 (SelectedRegions, RegionUnion)</l>
+<c></c>
+<c>* 对合并区域进行膨胀处理,其结构元素为圆形，半径为3.5</c>
+<l>dilation_circle (RegionUnion, RegionDilation, 3.5)</l>
+<c></c>
+<l>dev_display (Image)</l>
+<c></c>
+<l>dev_display (RegionDilation)</l>
+<l>Message := 'Region of the scratches after dilation'</l>
+<c></c>
+<c></c>
+<c>* 对膨胀后的区域进行求骨架</c>
+<l>skeleton (RegionDilation, Skeleton)</l>
+<c></c>
+<c>* 对获取的骨架区域进行连通处理</c>
+<l>connection (Skeleton, Errors)</l>
+<c></c>
+<l>dev_set_colored (12)</l>
+<c></c>
+<l>dev_display (Image)</l>
+<c></c>
+<l>dev_display (Errors)</l>
+<c></c>
+<c></c>
+<c>************************************************第三步: 获取大缺陷和小缺陷**************************************************</c>
+<c></c>
+<c>*过滤出大的缺陷</c>
+<l>select_shape (Errors, Scratches, 'area', 'and', 50, 10000)</l>
+<c></c>
+<c>*过滤出小的缺陷</c>
+<l>select_shape (Errors, Dots, 'area', 'and', 1, 50)</l>
+<c></c>
+<l>dev_display (Image)</l>
+<c></c>
+<l>dev_set_color ('red')</l>
+<c></c>
+<l>dev_display (Scratches)</l>
+<c></c>
+<l>dev_set_color ('blue')</l>
+<c></c>
+<l>dev_display (Dots)</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="open_zoom_window">
+<interface>
+<ic>
+<par name="RowPos" base_type="ctrl" dimension="0"/>
+<par name="ColPos" base_type="ctrl" dimension="0"/>
+<par name="RowROI1" base_type="ctrl" dimension="0"/>
+<par name="ColROI1" base_type="ctrl" dimension="0"/>
+<par name="RowROI2" base_type="ctrl" dimension="0"/>
+<par name="ColROI2" base_type="ctrl" dimension="0"/>
+<par name="ZoomFactor" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="WindowHandleZoom" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<l>dev_open_window (RowPos, ColPos, (ColROI2 - ColROI1) * ZoomFactor, (RowROI2 - RowROI1) * ZoomFactor, 'black', WindowHandleZoom)</l>
+<l>dev_set_part (round(RowROI1), round(ColROI1), round(RowROI2), round(ColROI2))</l>
+<l>return ()</l>
+</body>
+<docu id="open_zoom_window">
+<short lang="en_US">open window and set part</short>
+<parameters>
+<parameter id="ColPos"/>
+<parameter id="ColROI1"/>
+<parameter id="ColROI2"/>
+<parameter id="RowPos"/>
+<parameter id="RowROI1"/>
+<parameter id="RowROI2"/>
+<parameter id="WindowHandleZoom"/>
+<parameter id="ZoomFactor"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="close_zoom_window">
+<interface>
+<ic>
+<par name="WindowHandleZoom" base_type="ctrl" dimension="0"/>
+<par name="FormerWidth" base_type="ctrl" dimension="0"/>
+<par name="FormerHeight" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<l>dev_set_window (WindowHandleZoom)</l>
+<l>dev_close_window ()</l>
+<l>dev_set_part (0, 0, FormerHeight - 1, FormerWidth - 1)</l>
+<l>return ()</l>
+</body>
+<docu id="close_zoom_window">
+<short lang="en_US">close zoom window and reset part</short>
+<parameters>
+<parameter id="FormerHeight"/>
+<parameter id="FormerWidth"/>
+<parameter id="WindowHandleZoom"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

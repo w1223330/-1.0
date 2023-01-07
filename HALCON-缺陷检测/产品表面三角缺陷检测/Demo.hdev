@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>*读取一张图像</c>
+<l>read_image (Image, '1.jpg') </l>
+<c></c>
+<c>*将RGB图像转化为灰度图</c>
+<l>rgb1_to_gray (Image, GrayImage)</l>
+<c></c>
+<c>*使用自动阈值分割图像前景区域</c>
+<l>bin_threshold (GrayImage, Region)</l>
+<c></c>
+<c>*将前景区域中图像剪切出来</c>
+<l>reduce_domain (GrayImage, Region, ClipImage)</l>
+<c></c>
+<c>*均值滤波</c>
+<l>mean_image (ClipImage, ImageMean, 200, 3) </l>
+<c></c>
+<c>*局部阈值,分割出前景</c>
+<l>dyn_threshold (ClipImage, ImageMean, RegionDynThresh, 7, 'light') </l>
+<c></c>
+<c>*对分割的区域闭运算,填充间隙，平滑边界</c>
+<l>closing_circle (RegionDynThresh, RegionClosing, 3.5) </l>
+<c></c>
+<c>*连通处理</c>
+<l>connection (RegionClosing, ConnectedRegions) </l>
+<c></c>
+<c>*过滤出三角形区域</c>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 500, 2000) </l>
+<c></c>
+<c>*填充三角形内部区域</c>
+<l>fill_up (SelectedRegions, RegionFillUp) </l>
+<c></c>
+<c>*将三角形区域转换为凸度</c>
+<l>shape_trans (RegionFillUp, RegionTrans, 'convex') </l>
+<c></c>
+<c>*将区域转换为轮廓</c>
+<l>gen_contour_region_xld (RegionTrans, Contours, 'border') </l>
+<c></c>
+<c>*显示图像</c>
+<l>dev_display(GrayImage) </l>
+<c></c>
+<c>*显示三角形区域</c>
+<l>dev_display(Contours)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

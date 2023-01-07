@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 关闭窗口</c>
+<l>dev_close_window ()</l>
+<c></c>
+<c>*关闭程序计数器,图形变量更新,窗口图形更新</c>
+<l>dev_update_off ()</l>
+<c></c>
+<c>*设置图像路径</c>
+<l>Path := 'lcd/mura_defects_blur_'</l>
+<c></c>
+<c>*读取一张图像</c>
+<l>read_image (Image, Path + '01')</l>
+<c></c>
+<c>*获取图像大小</c>
+<l>get_image_size (Image, Width, Height)</l>
+<c></c>
+<c>*创建一个新窗体</c>
+<l>dev_open_window_fit_size (0, 0, Width, Height, 640, 480, WindowHandle)</l>
+<c></c>
+<c>*设置字体信息:字体大小为16，字体为mono,粗体，斜体</c>
+<l>set_display_font (WindowHandle, 14, 'mono', 'true', 'false')</l>
+<c></c>
+<c>*设置区域的填充方式</c>
+<l>dev_set_draw ('margin')</l>
+<c></c>
+<c>*设置线宽度</c>
+<l>dev_set_line_width (3)</l>
+<c></c>
+<c>*设置输出对象的显示颜色</c>
+<l>dev_set_color ('red')</l>
+<c></c>
+<l>ScaleFactor := 0.4</l>
+<c>*获取lines_gauss算子Sigma, Low, High三个参数值</c>
+<l>calculate_lines_gauss_parameters (17, [25,3], Sigma, Low, High)</l>
+<l>for f := 1 to 3 by 1</l>
+<c>    *读取一张图像</c>
+<l>    read_image (Image, Path + f$'.2i')</l>
+<c>    *获取彩色图像的R,G,B三分量</c>
+<l>    decompose3 (Image, R, G, B)</l>
+<c>    * *将图像转化为频域图像</c>
+<l>    rft_generic (B, ImageFFT, 'to_freq', 'none', 'complex', Width)</l>
+<c>    *生成一个高斯滤波核</c>
+<l>    gen_gauss_filter (ImageGauss, 100, 100, 0, 'n', 'rft', Width, Height)</l>
+<c>    *将频域图像核高斯滤波核进行卷积运算</c>
+<l>    convol_fft (ImageFFT, ImageGauss, ImageConvol)</l>
+<c>    *将卷积后的图像转换为空间域图像</c>
+<l>    rft_generic (ImageConvol, ImageFFT1, 'from_freq', 'none', 'byte', Width)</l>
+<c>    *用缺陷图像减去背景图像(时域图像)</c>
+<l>    sub_image (B, ImageFFT1, ImageSub, 2, 100)</l>
+<c>    * 对上述图像进行抽点，变焦</c>
+<l>    zoom_image_factor (ImageSub, ImageZoomed, ScaleFactor, ScaleFactor, 'constant')</l>
+<c>    *获取变焦后的图像的ROI</c>
+<l>    get_domain (ImageZoomed, Domain)</l>
+<c>    *图像ROI进行腐蚀操作</c>
+<l>    erosion_rectangle1 (Domain, RegionErosion, 7, 7)</l>
+<c>    *获取变焦图像中ROI区域内的图像</c>
+<l>    reduce_domain (ImageZoomed, RegionErosion, ImageReduced)</l>
+<c>    *探测线和获取线宽度</c>
+<l>    lines_gauss (ImageReduced, Lines, Sigma, Low, High, 'dark', 'true', 'gaussian', 'true')</l>
+<c>    *生成一个2D的齐次变换矩阵</c>
+<l>    hom_mat2d_identity (HomMat2DIdentity)</l>
+<c>    *添加一个缩放因子到齐次变换矩阵</c>
+<l>    hom_mat2d_scale_local (HomMat2DIdentity, 1 / ScaleFactor, 1 / ScaleFactor, HomMat2DScale)</l>
+<c>    *仿射变换</c>
+<l>    affine_trans_contour_xld (Lines, Defects, HomMat2DScale)</l>
+<c>    * 显示图像</c>
+<l>    dev_display (Image)</l>
+<c>    * 显示线缺陷</c>
+<l>    dev_display (Defects)</l>
+<c></c>
+<l>    stop ()</l>
+<c></c>
+<l>endfor</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
