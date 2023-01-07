@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image, '螺母测量.jpg')</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>dev_close_window()</l>
+<l>dev_open_window (0, 0, Width, Height, 'black', WindowHandle)</l>
+<l>dev_display (Image)</l>
+<l>rgb1_to_gray (Image, GrayImage)</l>
+<l>threshold (GrayImage, Region, 0, 30)</l>
+<l>connection (Region, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 923.15, 1000)</l>
+<c>*画圆轮廓</c>
+<l>create_metrology_model (MetrologyHandle)</l>
+<l>draw_circle_mod (WindowHandle, Width/2, Width/2, Width/20, Row, Column, Radius)</l>
+<l>gen_circle_contour_xld (ContCircle, Row, Column, Radius, 0, 6.28318, 'positive', 1)</l>
+<l>dev_display (ContCircle)</l>
+<l>dev_set_color ('green')</l>
+<c>*测量</c>
+<l>create_metrology_model (MetrologyHandle1)</l>
+<l>add_metrology_object_generic (MetrologyHandle1, 'circle', [Row, Column, Radius], 20, 5, 1, 30, [], [], Index)</l>
+<l>apply_metrology_model (GrayImage, MetrologyHandle1)</l>
+<l>get_metrology_object_result (MetrologyHandle1, 0, 'all', 'result_type', 'all_param', Parameter)</l>
+<l>get_metrology_object_result_contour (Contour, MetrologyHandle1, 'all', 'all', 1.5)</l>
+<l>get_metrology_object_measures (Contours, MetrologyHandle1, 'all', 'all', Row1, Column1)</l>
+<l>dev_display (Contours)</l>
+<l>stop ()</l>
+<l>clear_metrology_model (MetrologyHandle1)</l>
+<l>dev_display (GrayImage)</l>
+<l>message1:='Row='+Parameter[0]</l>
+<l>message2:='Cloumn='+Parameter[1]</l>
+<l>message3:='Radius='+Parameter[2]</l>
+<l>disp_message (WindowHandle, message1, 'window', 10,10, 'yellow', 'false')</l>
+<l>disp_message (WindowHandle, message2, 'window', 30,10, 'yellow', 'false')</l>
+<l>disp_message (WindowHandle, message3, 'window', 50,10, 'yellow', 'false')</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
